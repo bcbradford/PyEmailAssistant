@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "pyemailassistant"
 version = "0.1.0"
-description = "App that uses an AI classifier model to detect phishing email attempts."
+description = "App that uses an AI classifier model to detect phishing email attacks."
 authors = ["Brent Bradford"]
-license = "Apache 2.0"
+license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]

@@ -1,4 +1,4 @@
-''' Module used to load the app's config.yml file '''
+''' Load's the config.yml file into the app's config dictionary. '''
 
 import os
 import yaml
