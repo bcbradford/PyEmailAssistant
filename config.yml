@@ -1,0 +1,9 @@
+DEBUG: False
+ANALYTICS_PATH: "analytics"
+
+LOGGER:
+  NAME: "AppLogger"
+  LOG_PATH: "log"
+  INFO_LOG: "info.log"
+  ERROR_LOG: "error.log"
+  FORMAT: "[%(asctime)s] %(levelname)s - %(message)s"

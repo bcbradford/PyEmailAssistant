@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "pyemailassistant"
+version = "0.1.0"
+description = "App that uses an AI classifier model to detect phishing email attempts."
+authors = ["Brent Bradford"]
+license = "Apache 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyyaml = "^6.0.2"
+scikit-learn = "^1.5.2"
+xgboost = "^2.1.1"
+tensorflow-probability = "^0.24.0"
+
+[tool.poetry.scripts]
+pyemailassistant = "pyemailassistant.app:start"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+pytest-cov = "^5.0.0"
+pytest-mock = "^3.14.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
