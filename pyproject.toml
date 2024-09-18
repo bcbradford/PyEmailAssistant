@@ -12,6 +12,7 @@ pyyaml = "^6.0.2"
 scikit-learn = "^1.5.2"
 xgboost = "^2.1.1"
 tensorflow-probability = "^0.24.0"
+pyqt6 = "^6.7.1"
 
 [tool.poetry.scripts]
 pyemailassistant = "pyemailassistant.app:start"
