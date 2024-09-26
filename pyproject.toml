@@ -13,6 +13,8 @@ scikit-learn = "^1.5.2"
 xgboost = "^2.1.1"
 tensorflow-probability = "^0.24.0"
 pyqt6 = "^6.7.1"
+pandas = "^2.2.3"
+matplotlib = "^3.9.2"
 
 [tool.poetry.scripts]
 pyemailassistant = "pyemailassistant.app:start"

@@ -7,3 +7,6 @@ LOGGER:
   INFO_LOG: "info.log"
   ERROR_LOG: "error.log"
   FORMAT: "[%(asctime)s] %(levelname)s - %(message)s"
+
+MAIN_WINDOW:
+  TITLE: "PyEamil Assistant"
