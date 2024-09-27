@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
                 },
             "Model": {
                 "Train": (QAction("Train", self), self._train_model, True)
-                }
+                },
             "Settings": {
                 "Display": (QAction("Display", self), self._show_display_settings, True)
                 }
