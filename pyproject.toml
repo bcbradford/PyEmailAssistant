@@ -17,6 +17,8 @@ pandas = "^2.2.3"
 matplotlib = "^3.9.2"
 tensorflow = "^2.17.0"
 tqdm = "^4.66.5"
+tf-keras = "^2.17.0"
+torch = "^2.4.1"
 
 [tool.poetry.scripts]
 pyemailassistant = "pyemailassistant.app:run"
