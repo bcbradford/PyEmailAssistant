@@ -1,11 +1,9 @@
 ''' 
-    Script used to analize a training dataset
+    Script used to analyze a training dataset and the performance
+    of models trained on that dataset.
 
     TODO:
 
-        Execute Analysis Functions
-        Output Analysis Results
-        Write Training Functions
         Train Models
         Output Best Model
         Generate Report
