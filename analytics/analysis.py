@@ -6,7 +6,9 @@
 
         Train Models
         Output Best Model
-        Generate Report
+        Make Task -> Get body -> key word counts
+        Generate DF Analysis Report (remove single md file saves (!graphs))
+        Generate Model Report
 '''
 
 import sys
@@ -87,22 +89,25 @@ def start_processes(processes):
 
 def analyze_dataset(df, config):
     df['date'] = pd.to_datetime(df['date'], errors='coerce', utc=True)
+
+    # dict: {"analysis_name": df[col].describe.to_string()}
+    analysis_dict = {}
+
     output_path = config['script']['output_path']
-    tasks = generate_tasks(df, output_path)
-    total = tasks['total']
+    tasks = generate_tasks(df, output_path, analysis_dict)
+    total = tasks['total'] + 1  # task count + report generation
     desc = "Running Analysis"
-  
+
     with tqdm(total=total, desc=desc, position=0) as pbar:
         for col, task_list in tasks.items():
             if col == "total": continue
             for task in task_list: 
                 task()
                 pbar.update(1)
+        generate_analysis_report(analysis_dict, output_path)
+        pbar.update(1)
 
-def set_dates(df):
-    df['date'] = pd.to_datetime(df['date'], errors='coerce', utc=True)
-
-def generate_tasks(df, output_path) -> dict:
+def generate_tasks(df, output_path, analysis_dict) -> dict:
     tasks = {}
     tasks['total'] = 0
     
@@ -113,7 +118,7 @@ def generate_tasks(df, output_path) -> dict:
             task_list.append(lambda col=col: plot_frequency(df[col], output_path))
         elif pd.api.types.is_datetime64_any_dtype(dtype):
             task_list.append(lambda col=col: plot_dates(df[col], output_path))
-        task_list.append(lambda col=col: describe_series(df[col], output_path))
+        task_list.append(lambda col=col: describe_series(df[col], output_path, analysis_dict))
         tasks[col] = task_list
         tasks['total'] += len(tasks[col])
 
@@ -131,13 +136,9 @@ def plot_frequency(series, output_path):
 
     save_plt_graph(plt, title, output_path)
 
-def describe_series(series, output_path):
+def describe_series(series, output_path, analysis_dict):
     desc = series.describe()
-    file_name = f"{series.name}_description.md"
-    file_path = os.path.join(output_path, file_name)
-    with open(file_path, "w") as file:
-        file.write(f"{series.name} description\n")
-        file.write(desc.to_string())
+    analysis_dict[series.name] = desc
 
 def plot_dates(series, output_path):
     title = f"{series.name.title()} Line Graph"
@@ -149,6 +150,15 @@ def plot_dates(series, output_path):
     plt.ylabel("Frequency")
 
     save_plt_graph(plt, title, output_path)
+
+def generate_analysis_report(analysis_dict, output_path):
+    file_name = "analysis_report.md"
+    file_path = os.path.join(output_path, file_name)
+    with open(file_path, 'w') as file:
+        for name, report in analysis_dict.items():
+            file.write(f"{name.title()} Report\n")
+            file.write(f"{report}\n")
+            file.write(f"End {name.title()} Report\n\n")
 
 def save_plt_graph(plt_graph, title, output_path):
     file = title.replace(" ", "_").replace("(", "").replace(")", "").lower()
