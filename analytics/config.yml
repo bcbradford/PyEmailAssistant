@@ -1,5 +1,6 @@
 script:
 
+  dataset: 'CEAS_08.csv'
   threaded_training: True
   y_col: 'label'
   input_path: 'input'
