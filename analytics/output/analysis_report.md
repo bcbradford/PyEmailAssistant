@@ -1,3 +1,7 @@
+Error Report
+None
+End Error Report
+
 Receiver Report
 count                           38692
 unique                           3693
@@ -14,6 +18,14 @@ freq                                    462
 Name: sender, dtype: object
 End Sender Report
 
+Subject Report
+count                    39126
+unique                   15436
+top       CNN.com Daily Top 10
+freq                      2930
+Name: subject, dtype: object
+End Subject Report
+
 Date Report
 count                                  39139
 mean     2008-08-04 07:24:15.884232960+00:00
@@ -24,14 +36,6 @@ min                1980-01-04 05:39:00+00:00
 max                2100-05-27 19:54:05+00:00
 Name: date, dtype: object
 End Date Report
-
-Subject Report
-count                    39126
-unique                   15436
-top       CNN.com Daily Top 10
-freq                      2930
-Name: subject, dtype: object
-End Subject Report
 
 Label Report
 count    39154.000000
@@ -97,21 +101,21 @@ freq                                                      1
 Name: phishing: body contains call, dtype: object
 End Phishing: Body Contains Call Report
 
-Safe: Body Contains Free Report
-count                                                  2422
-unique                                                 2422
-top       Steve Jacobs wrote: > ---------- Forwarded mes...
+Safe: Body Contains Contact Report
+count                                                  1836
+unique                                                 1836
+top       \nPlelim,\n\nJust to remind you that if a cert...
 freq                                                      1
-Name: safe: body contains free, dtype: object
-End Safe: Body Contains Free Report
+Name: safe: body contains contact, dtype: object
+End Safe: Body Contains Contact Report
 
-Phishing: Body Contains Free Report
-count                                                  2000
-unique                                                 2000
-top       \n\n\n\n\n\n\n         Make  a present to some...
+Phishing: Body Contains Contact Report
+count                                                   174
+unique                                                  174
+top       \nA very delicate problem of penis size is a p...
 freq                                                      1
-Name: phishing: body contains free, dtype: object
-End Phishing: Body Contains Free Report
+Name: phishing: body contains contact, dtype: object
+End Phishing: Body Contains Contact Report
 
 Safe: Body Contains Click Report
 count                                                  1556
@@ -145,6 +149,46 @@ freq                                                      1
 Name: phishing: body contains link, dtype: object
 End Phishing: Body Contains Link Report
 
+Safe: Body Contains Free Report
+count                                                  2422
+unique                                                 2422
+top       Steve Jacobs wrote: > ---------- Forwarded mes...
+freq                                                      1
+Name: safe: body contains free, dtype: object
+End Safe: Body Contains Free Report
+
+Phishing: Body Contains Free Report
+count                                                  2000
+unique                                                 2000
+top       \n\n\n\n\n\n\n         Make  a present to some...
+freq                                                      1
+Name: phishing: body contains free, dtype: object
+End Phishing: Body Contains Free Report
+
+Email Contains Call Report
+count    8236.000000
+mean        0.419743
+std         0.493547
+min         0.000000
+25%         0.000000
+50%         0.000000
+75%         1.000000
+max         1.000000
+Name: email contains call, dtype: float64
+End Email Contains Call Report
+
+Email Contains Http:// Report
+count    25897.000000
+mean         0.574893
+std          0.494369
+min          0.000000
+25%          0.000000
+50%          1.000000
+75%          1.000000
+max          1.000000
+Name: email contains http://, dtype: float64
+End Email Contains Http:// Report
+
 Safe: Body Contains Money Report
 count                                                   377
 unique                                                  377
@@ -177,21 +221,17 @@ freq                                                      1
 Name: phishing: body contains https://, dtype: object
 End Phishing: Body Contains Https:// Report
 
-Safe: Body Contains Debt Report
-count                                                    38
-unique                                                   38
-top       Hello Andrew,\n\nORGANIC BYTES #140\nHealth, J...
-freq                                                      1
-Name: safe: body contains debt, dtype: object
-End Safe: Body Contains Debt Report
-
-Phishing: Body Contains Debt Report
-count                                                    25
-unique                                                   25
-top       \nDo Not consolidate your debt   Eliminate it!...
-freq                                                      1
-Name: phishing: body contains debt, dtype: object
-End Phishing: Body Contains Debt Report
+Email Contains Contact Report
+count    2010.000000
+mean        0.086567
+std         0.281270
+min         0.000000
+25%         0.000000
+50%         0.000000
+75%         0.000000
+max         1.000000
+Name: email contains contact, dtype: float64
+End Email Contains Contact Report
 
 Safe: Body Contains Pay Report
 count                                                   726
@@ -209,37 +249,89 @@ freq                                                      1
 Name: phishing: body contains pay, dtype: object
 End Phishing: Body Contains Pay Report
 
-Safe: Body Contains Contact Report
-count                                                  1836
-unique                                                 1836
-top       \nPlelim,\n\nJust to remind you that if a cert...
-freq                                                      1
-Name: safe: body contains contact, dtype: object
-End Safe: Body Contains Contact Report
+Email Contains Click Report
+count    4400.000000
+mean        0.646364
+std         0.478152
+min         0.000000
+25%         0.000000
+50%         1.000000
+75%         1.000000
+max         1.000000
+Name: email contains click, dtype: float64
+End Email Contains Click Report
 
-Phishing: Body Contains Contact Report
-count                                                   174
-unique                                                  174
-top       \nA very delicate problem of penis size is a p...
+Email Contains Link Report
+count    5523.000000
+mean        0.581568
+std         0.493346
+min         0.000000
+25%         0.000000
+50%         1.000000
+75%         1.000000
+max         1.000000
+Name: email contains link, dtype: float64
+End Email Contains Link Report
+
+Safe: Body Contains Debt Report
+count                                                    38
+unique                                                   38
+top       Hello Andrew,\n\nORGANIC BYTES #140\nHealth, J...
 freq                                                      1
-Name: phishing: body contains contact, dtype: object
-End Phishing: Body Contains Contact Report
+Name: safe: body contains debt, dtype: object
+End Safe: Body Contains Debt Report
+
+Phishing: Body Contains Debt Report
+count                                                    25
+unique                                                   25
+top       \nDo Not consolidate your debt   Eliminate it!...
+freq                                                      1
+Name: phishing: body contains debt, dtype: object
+End Phishing: Body Contains Debt Report
+
+Email Contains Free Report
+count    4422.000000
+mean        0.452284
+std         0.497774
+min         0.000000
+25%         0.000000
+50%         0.000000
+75%         1.000000
+max         1.000000
+Name: email contains free, dtype: float64
+End Email Contains Free Report
+
+Email Contains Https:// Report
+count    1152.000000
+mean        0.000868
+std         0.029463
+min         0.000000
+25%         0.000000
+50%         0.000000
+75%         0.000000
+max         1.000000
+Name: email contains https://, dtype: float64
+End Email Contains Https:// Report
+
+Email Contains Money Report
+count    1045.000000
+mean        0.639234
+std         0.480453
+min         0.000000
+25%         0.000000
+50%         1.000000
+75%         1.000000
+max         1.000000
+Name: email contains money, dtype: float64
+End Email Contains Money Report
 
  Report
-count                                                   142
-unique                                                  142
+count                                                   459
+unique                                                  459
 top       Good morning all,\n\nA customer is looking for...
 freq                                                      1
 Name: , dtype: object
 End  Report
-
-Phishing: Body Contains Number (Xxx-Xxx-Xxxx) Report
-count                                                    32
-unique                                                   32
-top       Bacheelor, MasteerMBA, and Doctoraate diplomas...
-freq                                                      1
-Name: phishing: body contains number (xxx-xxx-xxxx), dtype: object
-End Phishing: Body Contains Number (Xxx-Xxx-Xxxx) Report
 
 Phishing: Body Contains Number (Xxx-Xxxx) Report
 count                                                   243
@@ -256,4 +348,72 @@ top       Bacheelor, MasteerMBA, and Doctoraate diplomas...
 freq                                                      1
 Name: phishing: body contains number (x-xxx-xxx-xxxx), dtype: object
 End Phishing: Body Contains Number (X-Xxx-Xxx-Xxxx) Report
+
+Email Contains Pay Report
+count    1426.000000
+mean        0.490884
+std         0.500092
+min         0.000000
+25%         0.000000
+50%         0.000000
+75%         1.000000
+max         1.000000
+Name: email contains pay, dtype: float64
+End Email Contains Pay Report
+
+Email Contains Debt Report
+count    63.000000
+mean      0.396825
+std       0.493169
+min       0.000000
+25%       0.000000
+50%       0.000000
+75%       1.000000
+max       1.000000
+Name: email contains debt, dtype: float64
+End Email Contains Debt Report
+
+Phishing: Body Contains Number (Xxx-Xxx-Xxxx) Report
+count                                                    32
+unique                                                   32
+top       Bacheelor, MasteerMBA, and Doctoraate diplomas...
+freq                                                      1
+Name: phishing: body contains number (xxx-xxx-xxxx), dtype: object
+End Phishing: Body Contains Number (Xxx-Xxx-Xxxx) Report
+
+Email Contains Number (Xxx-Xxxx) Report
+count    1699.000000
+mean        0.143025
+std         0.350202
+min         0.000000
+25%         0.000000
+50%         0.000000
+75%         0.000000
+max         1.000000
+Name: email contains number (xxx-xxxx), dtype: float64
+End Email Contains Number (Xxx-Xxxx) Report
+
+Email Contains Number (X-Xxx-Xxx-Xxxx) Report
+count    158.000000
+mean       0.101266
+std        0.302640
+min        0.000000
+25%        0.000000
+50%        0.000000
+75%        0.000000
+max        1.000000
+Name: email contains number (x-xxx-xxx-xxxx), dtype: float64
+End Email Contains Number (X-Xxx-Xxx-Xxxx) Report
+
+Email Contains Number (Xxx-Xxx-Xxxx) Report
+count    491.000000
+mean       0.065173
+std        0.247083
+min        0.000000
+25%        0.000000
+50%        0.000000
+75%        0.000000
+max        1.000000
+Name: email contains number (xxx-xxx-xxxx), dtype: float64
+End Email Contains Number (Xxx-Xxx-Xxxx) Report
 

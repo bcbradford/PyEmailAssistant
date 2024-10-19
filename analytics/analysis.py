@@ -4,23 +4,22 @@
 
     TODO:
 
-        Conditional dataset checking
-            Label body -> phone pattern
-        Train Models
-        Output Best Model
-        Finish Analyze Body Method
-        Generate Model Report
+        Implement BNN Model
+        Change Grid Search to GridSearchCV
+        Change yml model conifg to list of attributes for grid search
+        Refactor pbars to be passed and disposed from main() function
 '''
 
 import os
-import gc
 import multiprocessing
 import yaml
 import pandas as pd
 import matplotlib.pyplot as plt
 import tensorflow_probability as tfp
 from tqdm import tqdm
+from sklearn.metrics import f1_score
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 
@@ -68,21 +67,18 @@ def run_analysis(df, config) -> dict:
     details from the highest performing models. '''
 
     threaded_training = config['script']['threaded_training']
-    manager = multiprocessing.Manager()
-    return_dict = manager.dict()
     processes = []
 
     processes.append(multiprocessing.Process(target=analyze_dataset, args=(df, config)))
 
     if threaded_training:
         processes.append(multiprocessing.Process(target=threaded_train_models,
-            args=(df, config, return_dict)))
+            args=(df, config)))
     else:
         processes.append(multiprocessing.Process(target=train_models, 
-            args=(df, config, return_dict)))
+            args=(df, config)))
 
     start_processes(processes)
-    return return_dict
 
 def start_processes(processes):
     for process in processes: process.start()
@@ -97,6 +93,8 @@ def analyze_dataset(df, config):
 
     # dict: {"analysis_name": df[col].describe.to_string()}
     analysis_dict = manager.dict()
+    analysis_dict['error'] = None
+
     processes = []
 
     output_path = config['script']['output_path']
@@ -108,7 +106,8 @@ def analyze_dataset(df, config):
     with tqdm(total=total_tasks, desc=desc, position=0) as pbar:
         for task_list in tasks:
             for task in task_list:
-                proc = multiprocessing.Process(target=execute_task, args=(task, counter, lock))
+                proc = multiprocessing.Process(target=execute_task, 
+                        args=(task, analysis_dict, counter, lock))
                 processes.append(proc)
 
         start_processes(processes)
@@ -116,6 +115,10 @@ def analyze_dataset(df, config):
         # spin lock
         while pbar.n < total_tasks - 1:
             pbar.update(counter.value - pbar.n)
+            if analysis_dict['error'] is not None:
+                terminate_processes(processses)
+                print(f"{analysis_dict['error']}")
+                return
 
         generate_analysis_report(analysis_dict, output_path)
         pbar.update(1)
@@ -136,16 +139,18 @@ def generate_tasks(df, output_path, analysis_dict) -> dict:
         if col == "body":
             add_body_tasks_to_list(task_list, df, output_path, analysis_dict)
 
-        task_list.append(lambda col=col: describe_series(df[col], output_path, analysis_dict))
+        task_list.append(lambda col=col: describe_series(df[col], analysis_dict))
         total += len(task_list)
         tasks.append(task_list)
 
     return (tasks, total)
 
-def execute_task(task, counter, lock):
-    task()
-    with lock:
-        counter.value += 1
+def execute_task(task, analysis_dict, counter, lock):
+    try:
+        task()
+        with lock: counter.value += 1
+    except Exception as e:
+        analysis_dict['error'] = e
 
 def add_body_tasks_to_list(task_list, df, output_path, analysis_dict):
     words = ["http://", "https://", "click", "call", "contact", "link",
@@ -168,7 +173,6 @@ def analyze_word_in_body(df, word, output_path, analysis_dict):
     series_name = ""
     df_with_word = df.loc[(df["body"].str.contains(word, case=False, 
         na=False))].copy()
-    df_with_word.fillna(0)
 
     for label in range(0, 2):
         if label == 1: 
@@ -179,13 +183,14 @@ def analyze_word_in_body(df, word, output_path, analysis_dict):
         filtered_df = df_with_word.loc[(df_with_word["label"]==label)].copy()
         filtered_df.rename(columns={"body": series_name}, inplace=True)
         series = filtered_df[series_name]
-        describe_series(series, output_path, analysis_dict)
+        describe_series(series, analysis_dict)
         filtered_df = None
         series = None
 
     series_name = f"email contains {word}"
     df_with_word.rename(columns={"label": series_name}, inplace=True)
     plot_frequency(df_with_word[series_name], output_path)
+    describe_series(df_with_word[series_name], analysis_dict)
     df_with_word = None
 
 
@@ -203,13 +208,14 @@ def analyze_phone_number_in_body(df, nformat, nregex, output_path, analysis_dict
         filtered_df = df_with_num.loc[(df_with_num["label"]==label)].copy()
         filtered_df.rename(columns={"body": series_name}, inplace=True)
         series = filtered_df[series_name]
-        describe_series(series, output_path, analysis_dict)
+        describe_series(series, analysis_dict)
         filtered_df = None
         series = None
 
     series_name = f"email contains number ({nformat})"
     df_with_num.rename(columns={"label": series_name}, inplace=True)
     plot_frequency(df_with_num[series_name], output_path)
+    describe_series(df_with_num[series_name], analysis_dict)
     df_with_num = None
     
 
@@ -228,7 +234,7 @@ def plot_frequency(series, output_path):
 
     save_plt_graph(plt, title, output_path)
 
-def describe_series(series, output_path, analysis_dict):
+def describe_series(series, analysis_dict):
     desc = series.describe()
     analysis_dict[series.name] = desc
 
@@ -260,43 +266,175 @@ def save_plt_graph(plt_graph, title, output_path):
     plt_graph.savefig(file_path)
     plt.clf()
 
-def threaded_train_models(df, config, return_dict) -> dict:
+def threaded_train_models(df, config) -> dict:
     manager = multiprocessing.Manager()
+    counter = manager.Value('i', 0)
+    lock = manager.Lock()
+    pbars = create_pbar_dict(config['model'])
+
+    # dict {"model_name": {"model_number": {{**model_params}, "score"}}}
+    analysis_dict = manager.dict()
+    analysis_dict['error'] = None
     processes = []
-    pbar_index = 1
+    output_path = config['script']['output_path']
     y_col = config['script']['y_col']
-    for model_type, model_params in config['model'].items():
-        return_dict[model_type] = manager.dict()
-        processes.append(multiprocessing.Process(target=train_model,
-            args=(df, y_col, model_params, pbar_index, return_dict[model_type])))
-        pbar_index += 1
+    preprocess_data(df, config)
+    num_models = 0
+
+    for model_type, model_dict in config['model'].items():
+        print(f"Creating proc for {model_type}")
+        analysis_dict[model_type] = manager.dict()
+        init_model_analysis_dict(analysis_dict[model_type], manager, model_dict)
+        processes.append(multiprocessing.Process(target=train_model_on_thread,
+            args=(df, y_col, model_dict, analysis_dict, model_type, pbars[model_type], 
+                counter, lock)))
+        num_models += 1
+
     start_processes(processes)
-    return return_dict
 
-def train_models(df, config, return_dict) -> dict:
-    pbar_index = 1
+    # spin lock
+    while counter.value < num_models:
+        if analysis_dict['error'] is not None:
+            terminate_processes(processes)
+            print(f"{analysis_dict['error']}")
+            return
+
+    generate_model_report(analysis_dict, output_path)
+
+def init_model_analysis_dict(analysis_dict, manager, model_dict):
+    # model_dict {"model_name", "model_key": {model_params}}
+    analysis_dict['best'] = manager.dict()
+    analysis_dict['best']['score'] = 0
+    models = len(model_dict.keys()) - 1
+    for i in range(1, models + 1):
+        model_key = f"model_{i}"
+        analysis_dict[model_key] = manager.dict()
+    return analysis_dict
+
+def terminate_processes(processes):
+    for proc in processes: proc.terminate()
+    for proc in processes: proc.join()
+
+def train_models(df, config) -> dict:
+    # dict {"model_name": {"model_number": {{**model_params}, "score"}}}
+    analysis_dict = {}
+    pbars = create_pbar_dict(config['model'])
+    output_path = config['script']['output_path']
     y_col = config['script']['y_col']
-    for model_type, model_params in config['model'].items():
-        return_dict[model_type] = {}
-        train_model(df, y_col, model_params, pbar_index, return_dict[model_type])
-        pbar_index += 1
-    return return_dict
+    df = preprocess_data(df, config)
 
-def train_model(df, y_col, model_params, pbar_index, return_dict):
-    desc = f"Training {model_params['model_name']}"
+    for model_type, model_dict in config['model'].items():
+        analysis_dict[model_type] = {}
+        train_model(df, y_col, model_dict, analysis_dict[model_type], 
+                pbar[model_type])
+
+    generate_model_report(analysis_dict, output_path)
+
+def create_pbar_dict(models):
+    pbars = {}
+    pbar_index = 1
+    for model_type, model_dict in models.items():
+        models = len(model_dict.keys()) - 1
+        pbars[model_type] = create_model_pbar(model_dict, models, pbar_index) 
+    return pbars
+
+def create_model_pbar(model_dict, num_models, pbar_index):
+    model_name = model_dict['model_name']
+    desc = f"Training {model_name}"
+    total = num_models
+    return tqdm(total=total, desc=desc, position=pbar_index)
+
+def preprocess_data(df, config):
+    # remove date and receiver to mitigate bias
+    drop_list = config['script']['drop_columns']
+    df.drop(columns=drop_list, inplace=True)
+    df.dropna(inplace=True)
+
+    encoder = LabelEncoder()
+    categorical_columns = config['script']['categorical_columns']
+
+    for col in categorical_columns:
+        df[col] = encoder.fit_transform(df[col].astype('category'))
+
+    return df
+
+def train_model_on_thread(df, y_col, model_dict, analysis_dict, model_type, 
+        pbar, counter, lock):
+    try:
+        print("Trying to train model")
+        train_model(df, y_col, model_dict, analysis_dict[model_type], pbar)
+        with lock: counter.value += 1
+    except Exception as e:
+        print(f"failed")
+        with lock: analysis_dict['error'] = e
+
+def train_model(df, y_col, model_dict, analysis_dict, pbar):
+    model_name = model_dict['model_name']
     total_tasks = 3
-    with tqdm(total=total_tasks, desc=desc, position=pbar_index) as pbar:
-        X_train, X_test, y_train, y_test = split_data(df, y_col)
-        
-        for i in range(0, total_tasks):
+    X_train, X_test, y_train, y_test = split_data(df, y_col)
+
+    for i in range(1, total_tasks + 1):
+        model_key = f"model_{i}"
+        model = create_model(model_dict, model_key)
+
+        if model is None:
             pbar.update(1)
+            continue
+
+        model.fit(X_train, y_train)
+        y_pred = model.predict(X_test)
+        score = f1_score(y_test, y_pred)
+        analysis_dict[model_key]['params'] = {**model_dict[model_key]}
+        analysis_dict[model_key]['score'] = score
+
+        if score > analysis_dict['best']['score']:
+            analysis_dict['best'] = analysis_dict[model_key]
+
+        pbar.update(1)
+
+    pbar.close()
+
+def create_model(model_dict, model_key):
+    model_name = model_dict['model_name']
+    param_dict = model_dict[model_key]
+    match model_name:
+        case "BayesianNeuralNetwork":
+            return create_bnn(param_dict)
+        case "RandomForestClassifier":
+            return create_rfc(param_dict)
+        case "XGBClassifier":
+            return create_xgbc(param_dict)
+        case _:
+            raise NotImplementedError(f"{model_name} not implemented")
+
+def create_rfc(model_params):
+    return RandomForestClassifier(**model_params)
+
+def create_xgbc(model_params):
+    return XGBClassifier(**model_params)
+
+def create_bnn(model_params):
+    return None
 
 def split_data(df, y_col):
     X = df
     y = X.pop(y_col)
-    X.drop(columns=['date'], inplace=True)
-
     return train_test_split(X, y, test_size=0.2, random_state=42)
+
+def generate_model_report(analysis_dict, output_path):
+    file_path = os.path.join(output_path, "model_report.md")
+    with open(file_path, 'w') as file:
+        for key, value in analysis_dict.items():
+            if key == 'error': continue
+            file.write(f"{key} Report\n\n")
+            write_model_report(file, value)
+            file.write("End Report\n\n")
+
+def write_model_report(file, model_dict):
+    for model_key, model_stats in model_dict.items():
+        file.write(f"\t{model_key}:\n\n")
+        for stat_name, stat_value in model_stats.items():
+            file.write(f"\t\t{stat_name}: {stat_value}\n\n")
 
 if __name__ == "__main__":
     main()

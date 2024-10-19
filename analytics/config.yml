@@ -3,6 +3,15 @@ script:
   dataset: 'CEAS_08.csv'
   threaded_training: True
   y_col: 'label'
+  drop_columns:
+    - "date"
+    - "receiver"
+  categorical_columns:
+    - "sender"
+    - "subject"
+    - "body"
+    - "urls"
+    - "label"
   input_path: 'input'
   output_path: 'output'
 
