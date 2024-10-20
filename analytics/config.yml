@@ -14,6 +14,49 @@ script:
     - "label"
   input_path: 'input'
   output_path: 'output'
+  
+  light_blue: [173, 216, 230]
+  light_green: [144, 238, 144]
+
+  pbars:
+    
+    dataset:
+      total: 24
+      desc: "Analyzing Dataset"
+      position: 0
+      
+    bnn:
+      total: 3
+      desc: "Training BNN"
+      position: 1
+
+    rfc:
+      total: 3
+      desc: "Training RFC"
+      position: 2
+
+    xgbc:
+      total: 3
+      desc: "Training XGBC"
+      position: 3
+
+  words:
+    - "http://"
+    - "https://"
+    - "click"
+    - "call"
+    - "contact"
+    - "link"
+    - "free"
+    - "money"
+    - "pay"
+    - "debt"
+
+  numbers:
+
+    x-xxx-xxx-xxxx: "\\d{1}\\s*-\\s*\\d{3}\\s*-\\s*\\d{3}\\s*-\\s*\\d{4}"
+    xxx-xxx-xxxx: "\\d{3}\\s*-\\s*\\d{3}\\s*-\\s*\\d{4}"
+    xxx-xxxx: "\\d{3}\\s*-\\s*\\d{4}"
 
 model:
 
