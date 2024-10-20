@@ -90,26 +90,31 @@ def run_analysis(df, config, pbar_dict):
     display_errors(proc_dict)
 
 def init_proc_dict(proc_dict, pbar_dict):
-    proc_dict['analysis_error'] = None
+    proc_dict['dataset_error'] = None
     proc_dict['model_error'] = None
     for key in pbar_dict.keys():
         proc_dict[key] = 0
 
 def spin_lock(processes, proc_dict, pbar_dict):
+    a_procs_stopped = False
+    m_procs_stopped = False
+
     while any(p.is_alive() for p in processes):
-        if proc_dict['analysis_error']:
+        if not a_procs_stopped and proc_dict['dataset_error'] is not None:
             processes[0].terminate()
             processes[0].join()
+            a_procs_stopped = True
 
-        if proc_dict['model_error']:
+        if not m_procs_stopped and proc_dict['model_error'] is not None:
             processes[1].terminate()
             processes[1].join()
+            m_procs_stopped = True
 
         for key, pbar in pbar_dict.items():
             pbar.update(proc_dict[key] - pbar.n)
 
 def display_errors(proc_dict):
-    e = proc_dict['analysis_error']
+    e = proc_dict['dataset_error']
     if e is not None:
         msg = "An error occured while analyzing the dataset"
         print(f"{msg}: {e}")

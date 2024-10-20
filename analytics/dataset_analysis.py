@@ -7,7 +7,7 @@ def run_dataset_analysis(df, config, proc_dict):
     try:
         dataset_analysis(df, config, proc_dict)
     except Exception as e:
-        proc_dict['analysis_error'] = e
+        proc_dict['dataset_error'] = e
  
 def dataset_analysis(df, config, proc_dict):
     manager = Manager()
@@ -67,7 +67,7 @@ def spin_lock(processes, proc_dict, analysis_dict, tasks):
         if e is not None:
             for proc in processes: proc.terminate()
             for proc in processes: proc.join()
-            proc_dict['analysis_error'] = e
+            proc_dict['dataset_error'] = e
             return
 
 def add_body_tasks_to_list(task_list, df, config, analysis_dict):
