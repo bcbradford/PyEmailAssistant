@@ -7,11 +7,10 @@
         Implement BNN Model
         Change Grid Search to GridSearchCV
         Change yml model config to list of attributes for grid search
-        Refactor pbars
 '''
 
 import os
-import time
+from time import sleep
 from multiprocessing import Manager, Process
 import yaml
 import pandas as pd
@@ -100,6 +99,7 @@ def spin_lock(processes, proc_dict, pbar_dict):
     m_procs_stopped = False
 
     while any(p.is_alive() for p in processes):
+        
         if not a_procs_stopped and proc_dict['dataset_error'] is not None:
             processes[0].terminate()
             processes[0].join()
@@ -116,11 +116,11 @@ def spin_lock(processes, proc_dict, pbar_dict):
 def display_errors(proc_dict):
     e = proc_dict['dataset_error']
     if e is not None:
-        msg = "An error occured while analyzing the dataset"
+        msg = "\nAn error occured while analyzing the dataset"
         print(f"{msg}: {e}")
     e = proc_dict['model_error']
     if e is not None:
-        msg = "An error occured while analyzing the models"
+        msg = "\nAn error occured while analyzing the models"
         print(f"{msg}: {e}")
 
 def close_pbars(pbar_dict):

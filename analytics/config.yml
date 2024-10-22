@@ -7,11 +7,12 @@ script:
     - "date"
     - "receiver"
   categorical_columns:
-    - "sender"
-    - "subject"
-    - "body"
     - "urls"
     - "label"
+    - "sender"
+    - "subject"
+  text_columns:
+    - "body"
   input_path: 'input'
   output_path: 'output'
   
@@ -104,7 +105,7 @@ model:
       max_depth: 10
       random_state: 42 
 
-  xgb:
+  xgbc:
 
     model_name: "XGBClassifier"
 
@@ -113,15 +114,18 @@ model:
       learning_rate: 0.1
       n_estimators: 100
       max_depth: 10
+      tree_method: 'hist'
 
     model_2:
     
       learning_rate: 0.1
       n_estimators: 200
       max_depth: 10 
+      tree_method: 'hist'
 
     model_3:
 
       learning_rate: 0.1
       n_estimators: 300
       max_depth: 10 
+      tree_method: 'hist'

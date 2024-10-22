@@ -1,5 +1,6 @@
 import os
 import re
+from time import sleep
 from multiprocessing import Manager, Process
 import matplotlib.pyplot as plt
 
@@ -62,7 +63,7 @@ def execute_task(task, analysis_dict, proc_dict, lock):
         with lock: analysis_dict['error'] = e
 
 def spin_lock(processes, proc_dict, analysis_dict, tasks):
-    while proc_dict['dataset'] < tasks:
+    while any(proc.is_alive() for proc in processes):
         e = analysis_dict['error']
         if e is not None:
             for proc in processes: proc.terminate()
@@ -89,6 +90,7 @@ def add_body_tasks_to_list(task_list, df, config, analysis_dict):
 def analyze_body(df, analysis_name, value, config, analysis_dict, is_regex):
     series_name = ""
     df_with_value = None
+
     if is_regex:
         df_with_value = df.loc[(df["body"].str.contains(value, case=True, regex=True,
             na=False))].copy()
@@ -97,6 +99,7 @@ def analyze_body(df, analysis_name, value, config, analysis_dict, is_regex):
             na=False))].copy()
 
     for label in range(0, 2):
+    
         if label == 1:
             series_name = f"phishing: {analysis_name}"
         else:
@@ -183,4 +186,4 @@ def generate_analysis_report(analysis_dict, config):
             file.write(f"End {name.title()} Report\n\n")
 
 if __name__ == "__main__":
-    print("Usage: python3 analysis.py")
+    print("Usage: python3 main.py")
