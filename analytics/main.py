@@ -10,7 +10,6 @@
 '''
 
 import os
-from time import sleep
 from multiprocessing import Manager, Process
 import yaml
 import pandas as pd
@@ -85,7 +84,7 @@ def run_analysis(df, config, pbar_dict):
 
     for p in processes: p.start()
     spin_lock(processes, proc_dict, pbar_dict)
-
+    
     display_errors(proc_dict)
 
 def init_proc_dict(proc_dict, pbar_dict):

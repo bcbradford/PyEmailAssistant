@@ -1,6 +1,5 @@
 import os
 import re
-from time import sleep
 from multiprocessing import Manager, Process
 import matplotlib.pyplot as plt
 
@@ -165,7 +164,8 @@ def plot_dates(series, config):
 
 def save_plt_graph(title, output_path):
     title = format_title(title) + ".png"
-    file_path = os.path.join(output_path, title)
+    report_path = os.path.join(output_path, "graphs")
+    file_path = os.path.join(report_path, title)
     plt.savefig(file_path)
     plt.clf()
 
@@ -176,9 +176,10 @@ def format_title(title):
 
 def generate_analysis_report(analysis_dict, config):
     output_path = config['script']['output_path']
-
+    reports_path = os.path.join(output_path, "reports")
     file_name = "analysis_report.md"
-    file_path = os.path.join(output_path, file_name)
+    file_path = os.path.join(reports_path, file_name)
+
     with open(file_path, 'w') as file:
         for name, report in analysis_dict.items():
             file.write(f"{name.title()} Report\n")
