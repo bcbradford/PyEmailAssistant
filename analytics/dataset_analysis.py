@@ -1,3 +1,7 @@
+'''
+    Script used to analyze the training dataset.
+'''
+
 import os
 import re
 from multiprocessing import Manager, Process

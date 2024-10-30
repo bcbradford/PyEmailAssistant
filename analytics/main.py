@@ -1,12 +1,6 @@
 '''
     Script used to analyze a training dataset, and model performance
     on that dataset
-
-    TODO:
-
-        Implement BNN Model
-        Change Grid Search to GridSearchCV
-        Change yml model config to list of attributes for grid search
 '''
 
 import os

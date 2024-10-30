@@ -1,3 +1,7 @@
+'''
+    Script used to train models and report their perfomance.
+'''
+
 import os
 import warnings
 import joblib
@@ -19,7 +23,6 @@ def run_model_analysis(df, config, proc_dict):
         model_analysis(df, config, proc_dict)
     except Exception as e:
         proc_dict['model_error'] = e
-
 
 def model_analysis(df, config, proc_dict):
     threaded_training = config['script']['threaded_training']
@@ -103,7 +106,6 @@ def init_threaded_analysis_dict(analysis_dict, manager, model_dict):
     analysis_dict['best_precision'] = manager.dict()
     analysis_dict['best_recall'] = manager.dict()
     analysis_dict['results'] = manager.dict()
-    return analysis_dict
 
 def train_models(df, config, proc_dict):
     analysis_dict = {}
