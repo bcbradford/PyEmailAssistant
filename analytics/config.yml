@@ -1,59 +1,75 @@
-bnn:
+script:
+
+  dataset: 'CEAS_08.csv'
+  threaded_training: True
+  y_col: 'label'
+
+  drop_columns:
+    - "date"
+    - "receiver"
+  categorical_columns:
+    - "urls"
+    - "label"
+    - "subject"
+    - "sender"
+  text_columns:
+    - "body"
+
+  input_path: 'input'
+  output_path: 'output'
   
-  model_name: "BayesianNeuralNetwork"
+  light_blue: [173, 216, 230]
+  light_green: [144, 238, 144]
 
-  model_1:
-
-      units: 128
-      activation: 'relu'
-      kernel_initializer: 'he_normal'
-
-  model_2:
-
-      units: 64
-      activation: 'relu'
-      kernel_initializer: 'he_normal'
-
-  model_3:
-
-      units: 32
-      activation: 'relu'
-      kernel_initializer: 'he_normal'
-
-rfc:
-
-  model_name: "RandomForestClassifier"
-
-  model_1:
-
-    n_estimators: 100
-    max_depth: 10
-    random_state: 42
-
-  model_2:
-
-    n_estimators: 200
-    max_depth: 10
-    random_state: 42
-
-  model_3:
-
-    n_estimators: 300
-    max_depth: 10
-    random_state: 42 
-
-xgb:
-
-  model_name: "XGBClassifier"
-
-  model_1:
-
-    learning_rate: 0.1
-    n_estimators: 100
-    max_depth: 10
-
-  model_2:
+  pbars:
     
-    learning_rate: 0.1
-    n_estimators: 200
-    max_depth: 10  
+    dataset:
+      total: 24
+      desc: "Analyzing Dataset"
+      position: 0
+      
+    model:
+      total: 3
+      desc: "Training Models"
+      position: 1
+
+  words:
+    - "http://"
+    - "https://"
+    - "click"
+    - "call"
+    - "contact"
+    - "link"
+    - "free"
+    - "money"
+    - "pay"
+    - "debt"
+
+  numbers:
+
+    x-xxx-xxx-xxxx: "\\d{1}\\s*-\\s*\\d{3}\\s*-\\s*\\d{3}\\s*-\\s*\\d{4}"
+    xxx-xxx-xxxx: "\\d{3}\\s*-\\s*\\d{3}\\s*-\\s*\\d{4}"
+    xxx-xxxx: "\\d{3}\\s*-\\s*\\d{4}"
+
+model:
+
+  mnb:
+  
+    model_name: "MultinominalNaiveBayes"
+    grid_search_params:
+      alpha: [0.05, 0.75, 0.1, 0.15]
+      fit_prior: [True, False]
+
+  rfc:
+
+    model_name: "RandomForestClassifier"
+    grid_search_params:
+      n_estimators: [100, 300, 500]
+      max_features: ["sqrt", "log2"]
+
+  xgbc:
+
+    model_name: "XGBClassifier"
+    grid_search_params:
+      learning_rate: [0.1, 0.15]
+      n_estimators: [100, 300, 500]
