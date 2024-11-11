@@ -12,10 +12,7 @@ def run():
     config = init_config()
     logger = init_logger(config["LOGGER"])
     app = QApplication(sys.argv)
-    main_window = init_main_window(config["MAIN_WINDOW"], logger)
-    
-    screen = QScreen.availableGeometry(QApplication.primaryScreen())
-    main_window.center(screen)
+    main_window = init_main_window(app, config, logger)
     main_window.show()
 
     sys.exit(app.exec())
