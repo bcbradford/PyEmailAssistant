@@ -74,7 +74,7 @@ def preprocess_data(df, config):
 def extract_domain(sender_series):
     match = re.search(r'<.*@(.*?)>', sender_series)
     if match: return match.group(1)
-    return None
+    return "unknown"
 
 def threaded_train_models(df, config, proc_dict):
     manager = Manager()
