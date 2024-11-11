@@ -17,11 +17,14 @@ def init_config() -> dict:
     if not config:
         raise ValueError(f"Failed to load configuration file: {config_path}")
 
-    # Set Analytics Paths
-    analytics_path = os.path.join(project_path, config["ANALYTICS_PATH"])
-    config["ANALYTICS_PATH"] = analytics_path
+    # Set Model File Paths
+    model_path = config["MODEL"]["MODEL_PATH"]
+    model_file_path = os.path.join(project_path, model_path)
 
-    # Set Logger Paths
+    for key, file in config["MODEL"]["FILES"].items():
+        config["MODEL"]["FILES"][key] = os.path.join(model_file_path, file)
+
+    # Set Logger File Paths
     log_path = config["LOGGER"]["LOG_PATH"]
     info_log_file = config["LOGGER"]["INFO_LOG"]
     info_log_path = os.path.join(project_path, log_path, info_log_file)

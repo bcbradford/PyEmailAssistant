@@ -1,5 +1,4 @@
 DEBUG: False
-ANALYTICS_PATH: "analytics"
 
 LOGGER:
   NAME: "AppLogger"
@@ -8,5 +7,16 @@ LOGGER:
   ERROR_LOG: "error.log"
   FORMAT: "[%(asctime)s] %(levelname)s - %(message)s"
 
+MODEL:
+  TYPE: "XGBClassifier"
+  MODEL_PATH: "model"
+  FILES:
+    MODEL_FILE: "xgbc_model.joblib"
+    URLS_ENCODER: "urls_encoder.joblib"
+    LABEL_ENCODER: "label_encoder.joblib"
+    SUBJECT_ENCODER: "subject_encoder.joblib"
+    DOMAIN_ENCODER: "domain_encoder.joblib"
+    BODY_VECTORIZER: "body_vectorizer.joblib"
+    
 MAIN_WINDOW:
   TITLE: "PyEamil Assistant"
