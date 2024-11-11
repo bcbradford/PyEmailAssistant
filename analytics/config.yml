@@ -7,13 +7,17 @@ script:
   drop_columns:
     - "date"
     - "receiver"
+    - "sender"
+
   categorical_columns:
     - "urls"
     - "label"
     - "subject"
-    - "sender"
+  
   text_columns:
     - "body"
+
+  sender_col: "sender"
 
   input_path: 'input'
   output_path: 'output'
