@@ -3,6 +3,7 @@
 '''
 
 import os
+import re
 import warnings
 import joblib
 import pandas as pd
@@ -38,6 +39,11 @@ def preprocess_data(df, config):
     drop_cols = config['script']['drop_columns']
     categorical_cols = config['script']['categorical_columns']
     text_cols = config['script']['text_columns']
+    sender_col = config['script']['sender_col']
+
+    # extract domain
+    df['domain'] = df[sender_col].apply(extract_domain)
+    categorical_cols.append("domain")
 
     df.drop(columns=drop_cols, inplace=True)
     df.dropna(inplace=True)
@@ -64,6 +70,11 @@ def preprocess_data(df, config):
     
     df.dropna(inplace=True)
     return df
+
+def extract_domain(sender_series):
+    match = re.search(r'<.*@(.*?)>', sender_series)
+    if match: return match.group(1)
+    return None
 
 def threaded_train_models(df, config, proc_dict):
     manager = Manager()
