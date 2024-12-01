@@ -1,8 +1,16 @@
+''' Module containing the main window class '''
+
 import sys
+import pandas as pd
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QMainWindow, QMenu, QPushButton, QWidget, QSizePolicy
 from PyQt6.QtWidgets import QRadioButton, QLineEdit, QLabel, QTextEdit
 from PyQt6.QtGui import QScreen, QAction
+
+from .dialog_window import init_dialog_window
+from pyemailassistant.errors import *
+from pyemailassistant.models import init_model
+
 
 class MainWindow(QMainWindow):
 
@@ -13,12 +21,21 @@ class MainWindow(QMainWindow):
         self._logger = logger
 
         self._init_window()
+        self._model = self._load_model(config, logger)
 
     def _init_window(self):
         self.setWindowTitle(self._window_config.get("TITLE", "App"))
         self._set_size()
         self._create_menubar()
         self._create_widgets()
+
+    def _load_model(self, config, logger):
+        try: return init_model(config["MODEL"], logger)
+        except AppError as e: self._display_error(e)
+        except Exception as e:
+            desc = "An unhandled error ocurred while loading the model."
+            error = AppError(desc, str(e))
+            self._display_error(error)
 
     def _set_size(self):
         x = self._window_config.get("X", 1024)
@@ -32,15 +49,8 @@ class MainWindow(QMainWindow):
         # Dictionary: { "Menu_Name": {"Action_Name": (Action, Event, LineSeparator)} }
         menus = {
             "File": { 
-                "Open": (QAction("Open", self), self._open_clicked, False),
-                "Exit": (QAction("Exit", self), self._close_clicked, False)
-                },
-            "Model": {
-                "Train": (QAction("Train", self), self._train_model_clicked, True)
-                },
-            "Settings": {
-                "Display": (QAction("Display", self), self._show_display_settings_clicked, True)
-                }
+                "Close": (QAction("Close", self), self._close_clicked, False)
+            }
         }
 
         for menu_name, actions in menus.items():
@@ -101,42 +111,109 @@ class MainWindow(QMainWindow):
         self.body_textbox.setGeometry(90, 70, 924, 688)
         self.body_textbox.setStyleSheet("font-size: 18px;")
 
-    def _open_clicked(self):
-        self._logger.info("Open Triggered")
-
     def _close_clicked(self):
         self._logger.info("Close Triggered")
         self.close()
 
-    def _train_model_clicked(self):
-        self._logger.info("Train Model Triggered")
-
-    def _show_display_settings_clicked(self):
-        self._logger.info("Show Display Settings Triggered")
-
     def _submit_clicked(self):
-        print("Submit Clicked")
-        print(f"Subject: {self.subject_textbox.text()}")
-        print(f"Domain: {self.domain_textbox.text()}")
-        print(f"Body: {self.body_textbox.toPlainText()}")
-        if self.url_radio.isChecked():
-            print("URL Radio Button Checked.")
-        self.subject_textbox.clear()
-        self.domain_textbox.clear()
-        self.body_textbox.clear()
+        try: self._validate_inputs()
+        except AppError as e: 
+            self._display_error(e)
+            return
+
+        data = {
+            "domain": [self.domain_textbox.text()],
+            "subject": [self.subject_textbox.text()],
+            "body": [self.body_textbox.toPlainText()],
+            "urls": ["1"] if self.url_radio.isChecked() else ["0"]
+        }
+
+        df = pd.DataFrame(data)
+
+        try: self._display_model_prediction(df)
+        except AppError as e: self._display_error(e)
+        except Exception as e:
+            desc = "An unhandled exception occured while getting model predictions."
+            error = AppError(desc, str(e))
+            self._display_error(error)
+
+    def _validate_inputs(self):
+        self._logger.info("Validating inputs.")
+
+        if self.subject_textbox.text() == "":
+            desc = "The subject can't be empty. Please type unknown if there is no subject."
+            raise InputValidationError(desc, "Empty subject field during validation.")
+
+        if self.domain_textbox.text() == "":
+            desc = "The domain can't be empty. Please type unkown if there is no domain."
+            raise InputValidationError(desc, "Empty domain field during validation.")
+
+        if self.body_textbox.toPlainText() == "":
+            desc = "The body can't be empty. Please type unkown if there is no body."
+            raise InputValidationError(desc, "Empty body field during validation.")
+
+        self._logger.info("Finished validating inputs.")
+
+    def _display_model_prediction(self, df):
+        try:
+            y_pred = self._model.predict(df)
+            text = ""
+            for i, y in enumerate(y_pred): text += self._get_model_result_text(i, y)
+            self._display_prediction(text)
+        except AppError as e:
+            self._display_error(e)
+
+    def _get_model_result_text(self, index, y):
+        self._logger.info(f"Getting prediction {index}: {y}")
+        text = f"Prediction: {y}\n\n"
+        
+        if y == 0:
+            msg = (
+                f"The {self._model.get_model_type()} model classified this email as **not a phishing attempt**.\n\n"
+                "However, please note that machine learning models can make mistakes. To stay safe:\n"
+                "- Avoid clicking on any links or downloading attachments unless you're certain of the sender.\n"
+                "- If you're unsure, contact the sender (e.g., your financial institution or the business)\n"
+                "using their official website or phone number to verify the email.\n\n"
+            )
+        else:
+            msg = (
+                f"The {self._model.get_model_type()} model classified this email as a **phishing attempt**.\n\n"
+                "We strongly recommend:\n"
+                "- Avoid clicking any links or downloading attachments in this email.\n"
+                "- Delete the email immediately if it seems suspicious.\n"
+                "- Report it to your email provider or the appropriate authority.\n\n"
+            )
+
+        self._logger.info("Finished getting prediction text.")
+        return text + msg
+
+    def _display_error(self, error):
+        self._logger.error(error.get_logger_output())
+        error_dialog = init_dialog_window("Error", error.to_string())
+        error_dialog.exec()
+
+    def _display_prediction(self, text):
+        prediction_dialog = init_dialog_window("Prediction Result", text)
+        prediction_dialog.exec()
 
 def init_main_window(app: "QApplication", config: dict, logger: "logger") -> MainWindow:
-    logger.info("Creating Main Window")
-    window = MainWindow(config, logger)
     
-    # center window
-    screen = QScreen.availableGeometry(app.primaryScreen())
-    screen_center = screen.center()
-    window_frame = window.frameGeometry()
-    window_frame.moveCenter(screen_center)
+    try:
+        logger.info("Creating Main Window")
+        window = MainWindow(config, logger)
+    
+        # center window
+        screen = QScreen.availableGeometry(app.primaryScreen())
+        screen_center = screen.center()
+        window_frame = window.frameGeometry()
+        window_frame.moveCenter(screen_center)
 
-    window.move(window_frame.topLeft())
+        window.move(window_frame.topLeft())
 
-    logger.info("Main Window Created")
-    return window
-
+        logger.info("Main Window Created")
+        return window
+    except Exception as e:
+        desc = "An error ocurred while loading the main window."
+        error = AppLoadError(desc, str(e))
+        logger.error(str(e))
+        raise error
