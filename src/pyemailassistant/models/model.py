@@ -1,7 +1,6 @@
 ''' Module used to wrap a machine learning model and its dataset preprocessing objects. '''
 
 import pandas as pd
-import numpy as np
 from joblib import load
 from torch import cuda
 from pyemailassistant.errors import *
