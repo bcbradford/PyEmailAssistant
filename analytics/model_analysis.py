@@ -7,6 +7,7 @@ import re
 import warnings
 import joblib
 import pandas as pd
+import numpy as np
 from torch import cuda
 from multiprocessing import Manager, Process
 from sklearn.metrics import f1_score, confusion_matrix
@@ -46,18 +47,24 @@ def preprocess_data(df, config):
     categorical_cols.append("domain")
 
     df.drop(columns=drop_cols, inplace=True)
-    df.dropna(inplace=True)
+    # df.dropna(inplace=True)
 
     encoder = LabelEncoder()
     vectorizer = TfidfVectorizer(max_features=2000)
 
     for col in categorical_cols:
+        df[col] = df[col].fillna("unkown")
         df[col] = encoder.fit_transform(df[col].astype('category'))
+
+        # Add unkownw to the encoder's classes
+        if "unkown" not in encoder.classes_:
+            encoder.classes_ = np.append(encoder.classes_, "unkown")
+
         file_path = os.path.join(obj_path, f"{col}_encoder.joblib")
         joblib.dump(encoder, file_path, compress=3)
 
     for col in text_cols:
-        df[col] = df[col].fillna('')
+        df[col] = df[col].fillna("unkown")
         X = vectorizer.fit_transform(df[col])
 
         feature_cols = [f"{col}_{word}" for word in vectorizer.get_feature_names_out()]

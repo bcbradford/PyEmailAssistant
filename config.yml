@@ -13,7 +13,6 @@ MODEL:
   FILES:
     MODEL_FILE: "xgbc_model.joblib"
     URLS_ENCODER: "urls_encoder.joblib"
-    LABEL_ENCODER: "label_encoder.joblib"
     SUBJECT_ENCODER: "subject_encoder.joblib"
     DOMAIN_ENCODER: "domain_encoder.joblib"
     BODY_VECTORIZER: "body_vectorizer.joblib"

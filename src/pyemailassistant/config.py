@@ -17,6 +17,11 @@ def init_config() -> dict:
     if not config:
         raise ValueError(f"Failed to load configuration file: {config_path}")
 
+    _set_paths(config, project_path)
+
+    return config
+
+def _set_paths(config, project_path):
     # Set Model File Paths
     model_path = config["MODEL"]["MODEL_PATH"]
     model_file_path = os.path.join(project_path, model_path)
@@ -24,13 +29,12 @@ def init_config() -> dict:
     for key, file in config["MODEL"]["FILES"].items():
         config["MODEL"]["FILES"][key] = os.path.join(model_file_path, file)
 
-    # Set Logger File Paths
     log_path = config["LOGGER"]["LOG_PATH"]
-    info_log_file = config["LOGGER"]["INFO_LOG"]
-    info_log_path = os.path.join(project_path, log_path, info_log_file)
-    error_log_file = config["LOGGER"]["ERROR_LOG"]
-    error_log_path = os.path.join(project_path, log_path, error_log_file)
-    config["LOGGER"]["INFO_LOG"] = info_log_path
-    config["LOGGER"]["ERROR_LOG"] = error_log_path
+    info_file = config["LOGGER"]["INFO_LOG"]
+    info_path = os.path.join(project_path, log_path, info_file)
+    error_file = config["LOGGER"]["ERROR_LOG"]
+    error_path = os.path.join(project_path, log_path, error_file);
 
-    return config
+    config["LOGGER"]["INFO_LOG"] = info_path
+    config["LOGGER"]["ERROR_LOG"] = error_path
+

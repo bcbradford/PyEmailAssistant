@@ -42,4 +42,6 @@ class TrainingFileLoadError(AppError):
     def __init__(self, description, logger_output=None):
         super().__init__("TrainingFileLoadError", description, logger_output)
 
-
+class ModelPreprocessingError(AppError):
+    def __init__(self, description, logger_output=None):
+        super().__init__("ModelPreprocessingError", description, logger_output)
