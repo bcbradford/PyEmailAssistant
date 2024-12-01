@@ -2,9 +2,11 @@
 
 import logging
 
-def init_logger(config: dict) -> "Logger":
+def init_logger(config: dict, debug=False) -> "Logger":
     logger = logging.getLogger(config["NAME"])
-    logger.setLevel(logging.DEBUG)
+    
+    if debug: logger.setLevel(logging.DEBUG)
+    else: logger.setLevel(logging.WARNING)
 
     info_handler = logging.FileHandler(config["INFO_LOG"])
     info_handler.setLevel(logging.INFO)
