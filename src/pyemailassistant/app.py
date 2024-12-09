@@ -14,7 +14,7 @@ def run():
     warnings.filterwarnings("ignore", category=UserWarning)
 
     config = init_config()
-    logger = init_logger(config["LOGGER"])
+    logger = init_logger(config["LOGGER"], config["DEBUG"])
     app = QApplication(sys.argv)
     
     try: main_window = init_main_window(app, config, logger)
