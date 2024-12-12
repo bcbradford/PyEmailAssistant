@@ -65,7 +65,7 @@ sudo apt install libgl1 libxkbcommon-x11-0 libegl1-mesa libxcb-xinerama0 libxcb-
 
 # Clone the repository and change your directory
 git clone https://github.com/bcbradford/PyEmailAssistant.git
-cd PyAssistant
+cd PyEmailAssistant
 
 # Install PyEmailAssistant
 poetry install
